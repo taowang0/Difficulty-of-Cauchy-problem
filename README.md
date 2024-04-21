@@ -1,4 +1,4 @@
-## Burgers' equation simulation 1D
+## Understanding the Difficulty of Solving Cauchy Problems with PINNs 
 
 #### Source and citation: 
 [https://github.com/sachabinder/Burgers\_equation\_simulation/tree/main](https://github.com/sachabinder/Burgers_equation_simulation/tree/main)
