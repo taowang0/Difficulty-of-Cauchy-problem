@@ -1,6 +1,6 @@
 ## Understanding the Difficulty of Solving Cauchy Problems with PINNs 
 
-This repo contains the code for experiments in paper ["Understanding the Difficulty of Solving Cauchy Problems with PINNs"]((https://github.com/taowang0/Understanding-the-Difficulty-of-Solving-Cauchy-Problems-with-PINNs) published at L4DC, 2024.
+This repo contains the code for experiments in paper ["Understanding the Difficulty of Solving Cauchy Problems with PINNs"](https://github.com/taowang0/Understanding-the-Difficulty-of-Solving-Cauchy-Problems-with-PINNs) published at L4DC, 2024.
 
 #### True solution by spectral methods
 
