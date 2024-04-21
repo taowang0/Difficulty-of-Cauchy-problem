@@ -1,0 +1,148 @@
+import tensorflow as tf
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras import Input
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator
+import matplotlib.pyplot as plt
+import time
+
+
+def get_solution():
+    input_x = Input(shape=(x_shape,))
+    x = layers.Dense(256, activation="sigmoid", kernel_initializer="RandomUniform", bias_initializer="RandomUniform")(input_x)
+    x = layers.Dense(256, activation="sigmoid", kernel_initializer="RandomUniform", bias_initializer="RandomUniform")(x)
+#    x = layers.Dense(256, activation="sigmoid", kernel_initializer="RandomUniform", bias_initializer="RandomUniform")(x)
+    output = layers.Dense(1, activation=None)(x)
+    solution = tf.keras.Model(inputs=input_x, outputs=output)
+    return solution
+
+
+def gradient(x):
+    with tf.GradientTape() as tape:
+        y = solution(x)
+    grad = tape.gradient(y, x)
+    return grad
+
+def hessian(x):
+    with tf.GradientTape() as tape:
+        y = gradient(x)
+    grad = tape.gradient(y, x)
+    grad = tf.matmul(grad, A1)
+    return grad
+
+
+def train_solution(i):
+    with tf.GradientTape() as tape:
+        grad = gradient(x)
+        residual = tf.matmul(grad, A)
+        residual = tf.reduce_mean(residual ** 2)
+        err2 = loss_function(solution(x2), initial(x2))
+        error = residual + err2
+    if (i % 10 == 0):
+        print("residual:", residual, "initial:", err2,)
+    grad = tape.gradient(error, solution.trainable_weights)
+    optimizer.apply_gradients(zip(grad, solution.trainable_weights))
+    return None
+
+
+def train_solution2(i):
+    with tf.GradientTape() as tape:
+        grad = gradient(x)
+        u = solution(x)
+        u_x = tf.matmul(grad, A1)
+        u_t = tf.matmul(grad, A2)
+        u_xx = hessian(x)
+    #    residual = u_t + u * u_x
+        residual = u_t - u * u_x - 0.001 * u_xx
+        residual = tf.reduce_mean(residual ** 2)
+        err2 = loss_function(solution(x2), initial(x2))
+        error = residual + err2
+        curve[i] = error
+    if (i % 10 == 0):
+        print("residual:", residual, "initial:", err2,)
+    grad = tape.gradient(error, solution.trainable_weights)
+    optimizer.apply_gradients(zip(grad, solution.trainable_weights))
+    return None
+
+def sampling_state():
+    x1 = tf.random.uniform(shape=(batch_size, 1), minval=-1., maxval=1.)
+    x2 = tf.random.uniform(shape=(batch_size, 1), minval=0., maxval=1.)
+    H1 = tf.constant([[1., 0.]])
+    H2 = tf.constant([[0., 1.]])
+    x = tf.Variable(tf.matmul(x1, H1) + tf.matmul(x2, H2))
+    return x
+
+def sampling_state2():
+    x1 = tf.random.uniform(shape=(batch_size, 1), minval=-1., maxval=1.)
+    x2 = tf.random.uniform(shape=(batch_size, 1), minval=0., maxval=1.)
+    H1 = tf.constant([[1., 0.]])
+    H2 = tf.constant([[0., 1.]])
+    x = tf.Variable(tf.matmul(x1, H1) + 0. * tf.matmul(x2, H2))
+    return x
+
+def initial(x):
+ #   y = tf.sin(np.pi * x / 2.)
+    y = tf.sin(np.pi * x / 2.)
+  #  y = -0.5 * tf.sign(x) + 0.5
+  #  y = 0.
+    return y
+
+ta = time.time()
+
+x_shape = 2
+batch_size = 1000
+loss_function = keras.losses.MeanSquaredError()
+optimizer = keras.optimizers.SGD(learning_rate=0.01)
+#optimizer = keras.optimizers.Adam(learning_rate=0.001)
+A = tf.constant([[1.], [1.]])
+A1 = tf.constant([[1.], [0.]])
+A2 = tf.constant([[0.], [1.]])
+
+
+solution = get_solution()
+
+
+
+x = sampling_state()
+x2 = sampling_state2()
+
+curve = np.zeros(shape=(10000, ))
+
+for i in range(0, 10000):
+    train_solution2(i)
+
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+
+X, Y = np.meshgrid(np.arange(-1., 1.1, 0.1), np.arange(0., 1.01, 0.05))
+U = np.zeros(shape=(21, 21))
+for i in range(0, 21):
+    for j in range(0, 21):
+        x = tf.convert_to_tensor(np.reshape([X[i, j], Y[i, j]], newshape=(1, 2)), dtype='float32')
+        U[i, j] = solution(x)
+surf = ax.plot_surface(X, Y, U, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+#ax.set_zlim(-1.01, 1.01)
+ax.set_xlabel('x')
+ax.set_ylabel('t')
+ax.zaxis.set_major_locator(LinearLocator(10))
+ax.zaxis.set_major_formatter('{x:.02f}')
+#fig.colorbar(surf, shrink=0.5, aspect=5)
+plt.show()
+
+tt = np.linspace(0, 9999, 10000)
+
+fig, ax1 = plt.subplots()
+color = 'tab:red'
+ax1.set_xlabel('#Iteration')
+ax1.set_ylabel('Loss')
+ax1.plot(tt, curve, label='SGD', lw=1.3, linestyle='solid')
+#ax1.plot(tt, curve2, label='Adam', lw=1.3, linestyle='solid')
+ax1.set_xlim(0, 10000)
+ax1.set_ylim(0, 1)
+plt.legend()
+plt.show()
+
+tb = time.time()
+print("time elapsed: {0:.8f} s".format(tb - ta))
