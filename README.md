@@ -1,9 +1,11 @@
 ## Understanding the Difficulty of Solving Cauchy Problems with PINNs 
 
-#### Source and citation: 
-[https://github.com/sachabinder/Burgers\_equation\_simulation/tree/main](https://github.com/sachabinder/Burgers_equation_simulation/tree/main)
+This repo contains the code for experiments in paper ["Understanding the Difficulty of Solving Cauchy Problems with PINNs"](https://[github.com/sachabinder/Burgers_equation_simulation/tree/main](https://github.com/taowang0/Understanding-the-Difficulty-of-Solving-Cauchy-Problems-with-PINNs/edit/main/README.md)) published at L4DC, 2024.
 
-> Sacha BINDER. Étude de l’observation et de la modélisation des ondes de surface en eau peu profonde. Physique-Informatique.TIPE session 2021.
+#### True solution by spectral methods
+
+The true solution data (involved in generating Figure 6(d) and 7(a)) is obtained by the solver from 
+[https://github.com/sachabinder/Burgers\_equation\_simulation/tree/main](https://github.com/sachabinder/Burgers_equation_simulation/tree/main).
 
 Run solver:
 
@@ -11,9 +13,16 @@ Run solver:
 python Burgers_solver_SP.py
 ```
 
-Solution is saved in `data/U.npy`. A 3D plot of the solution is saved in `figures/Burgers_solution.pdf`.
 
-## Neural network fitting (for MSE loss)
+#### Solving with PINN loss
+
+Reproduce Figure 6(a)-(c) (failures by minimizing PINN loss):
+
+```
+python Solving_with_PINN_loss.py
+```
+
+#### Neural network fitting (for MSE loss)
 
 Reproduce Figure 7(b) and 7(c) (neural network approximation error vs width or depth):
 
@@ -27,4 +36,3 @@ Create a 3D plot of neural network fitting result and reproduce Figure 8 (soluti
 ```
 python train_2d_plot.py
 ```
-Figures are saved in the directory `figures/`. 
